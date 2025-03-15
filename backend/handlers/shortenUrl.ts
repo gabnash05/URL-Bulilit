@@ -1,24 +1,46 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { randomBytes } from 'crypto';
+import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { createHash } from 'crypto';
 
-const dynamoDB = new DynamoDBClient({ region: "ap-southeast-2"})
+const dynamoDB = new DynamoDBClient({ region: "ap-southeast-2"});
 const TABLE_NAME: string = "urls";
  
-export const handler: APIGatewayProxyHandler = async(event) => {
+export const handler: APIGatewayProxyHandler = async (event) => {
   try {
     const body = JSON.parse(event.body || "{}")
+    if (!body) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing URL" }),
+      }
+    }
 
-    const shortKey = randomBytes(4).toString('hex');
-    await dynamoDB.send(new PutItemCommand({
+    const shortKey = createHash("sha256").update(body.url).digest("hex").slice(0, 8);
+
+    const urlExists = await dynamoDB.send( new GetItemCommand({
       TableName: TABLE_NAME,
-      Item: {
-        id: { S: shortKey },
-        originalUrl: { S: body.url },
+      Key: {
+        id: { S: shortKey }
       }
     }));
 
-  } catch (error) {
-    return { statusCode: 500, body: JSON.stringify({ error: "Internal Server Error" }) };
+    if (!urlExists.Item) {
+      await dynamoDB.send(new PutItemCommand({
+        TableName: TABLE_NAME,
+        Item: {
+          id: { S: shortKey },
+          originalUrl: { S: body.url },
+          clicks: { N: "0"},
+        }
+      }));
+    }
+    
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ shortenedUrl: `https://DOMANNAME.com/${shortKey}`}),
+    };
+
+  } catch (error: any) {
+    return { statusCode: 500, body: JSON.stringify({ error: `Internal Server Error: ${error.message}` }) };
   }
-}
+};
