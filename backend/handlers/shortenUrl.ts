@@ -15,7 +15,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       }
     }
 
-    const shortKey = createHash("sha256").update(body.url).digest("hex").slice(0, 8);
+    const shortKey = createHash("sha256").update(body.url).digest("hex").slice(0, 5);
 
     const urlExists = await dynamoDB.send( new GetItemCommand({
       TableName: TABLE_NAME,
@@ -40,7 +40,17 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify({ shortenedUrl: `https://DOMANNAME.com/${shortKey}`}),
     };
 
-  } catch (error: any) {
-    return { statusCode: 500, body: JSON.stringify({ error: `Internal Server Error: ${error.message}` }) };
+  } catch (error: unknown) {
+    let errorMessage = "Internal Server Error";
+
+    if (error instanceof Error) {
+        errorMessage += `: ${error.message}`;
+    } else if (typeof error === "string") {
+        errorMessage += `: ${error}`;
+    } else {
+        errorMessage += `: An unknown error occurred`;
+    }
+
+    return { statusCode: 500, body: JSON.stringify({ error: errorMessage }) };
   }
 };
