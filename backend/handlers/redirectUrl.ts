@@ -43,14 +43,16 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
 
   } catch (error: unknown) {
+    console.error("Lambda function error:", error);
+    
     let errorMessage = "Internal Server Error";
 
     if (error instanceof Error) {
-        errorMessage += `: ${error.message}`;
-    } else if (typeof error === "string") {
-        errorMessage += `: ${error}`;
+      errorMessage += `: ${error.message}`;
+    } else if (typeof error === "string" && error.trim() !== "") {
+      errorMessage += `: ${error}`;
     } else {
-        errorMessage += `: An unknown error occurred`;
+      errorMessage += ": An unknown error occurred";
     }
 
     return { statusCode: 500, body: JSON.stringify({ error: errorMessage }) };

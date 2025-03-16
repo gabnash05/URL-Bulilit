@@ -1,23 +1,31 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { createHash } from 'crypto';
 
 const dynamoDB = new DynamoDBClient({ region: "ap-southeast-2"});
 const TABLE_NAME: string = "urls";
  
-export const handler: APIGatewayProxyHandler = async (event) => {
+export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => {
   try {
-    const body = JSON.parse(event.body || "{}")
-    if (!body) {
+    if (!event.body) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing request body" }),
+      };
+    }
+
+    const { url } = JSON.parse(event.body);
+
+    if (!url) {
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Missing URL" }),
-      }
+      };
     }
 
-    const shortKey = createHash("sha256").update(body.url).digest("hex").slice(0, 5);
+    const shortKey = createHash("sha256").update(url).digest("hex").slice(0, 5);
 
-    const urlExists = await dynamoDB.send( new GetItemCommand({
+    const urlExists = await dynamoDB.send(new GetItemCommand({
       TableName: TABLE_NAME,
       Key: {
         id: { S: shortKey }
@@ -29,7 +37,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         TableName: TABLE_NAME,
         Item: {
           id: { S: shortKey },
-          originalUrl: { S: body.url },
+          originalUrl: { S: url },
           clicks: { N: "0"},
         }
       }));
