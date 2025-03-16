@@ -43,7 +43,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
 
   } catch (error: unknown) {
-    console.error("Lambda function error:", error);
+    // console.error("Lambda function error:", error);
     
     let errorMessage = "Internal Server Error";
 
