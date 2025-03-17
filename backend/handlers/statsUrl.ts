@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 
 const dynamoDB = new DynamoDBClient({ region: "ap-southeast-2" });
-const TABLE_NAME = "urls";
+const TABLE_NAME = process.env.TABLE_NAME;
 
 export const handler: APIGatewayProxyHandler = async () => {
   try {

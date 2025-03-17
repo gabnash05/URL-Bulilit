@@ -3,7 +3,7 @@ import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-
 import { createHash } from 'crypto';
 
 const dynamoDB = new DynamoDBClient({ region: "ap-southeast-2"});
-const TABLE_NAME: string = "urls";
+const TABLE_NAME = process.env.TABLE_NAME;
  
 export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => {
   try {

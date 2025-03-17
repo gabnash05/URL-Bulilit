@@ -3,7 +3,7 @@ import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { MinPriorityQueue } from '@datastructures-js/priority-queue';
 
 const dynamoDB = new DynamoDBClient({ region: "ap-southeast-2"});
-const TABLE_NAME = 'urls';
+const TABLE_NAME = process.env.TABLE_NAME;
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   try {
