@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { LambdaStack } from "./lambda-stack";
 import { Construct } from "constructs";
-import { IFunction } from "aws-cdk-lib/aws-lambda";
 
 export class ApiStack extends cdk.Stack {
   public readonly api: apigateway.RestApi;
