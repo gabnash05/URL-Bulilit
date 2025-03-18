@@ -11,7 +11,7 @@ export class ApiStack extends cdk.Stack {
     super(scope, id, props);
 
     // API Gateway
-    const api = new apigateway.RestApi(this, "URL-Bulilit-Api");
+    this.api = new apigateway.RestApi(this, "URL-Bulilit-Api");
 
     // Routes
     this.api.root
@@ -27,7 +27,7 @@ export class ApiStack extends cdk.Stack {
       .addMethod("GET", new apigateway.LambdaIntegration(lambdaStack.statsFn));
 
     // CORS
-    api.root.addCorsPreflight({
+    this.api.root.addCorsPreflight({
       allowOrigins: apigateway.Cors.ALL_ORIGINS,
       allowMethods: apigateway.Cors.ALL_METHODS,
     });
