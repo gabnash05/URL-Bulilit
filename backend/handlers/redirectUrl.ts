@@ -8,7 +8,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   try {
     const shortKey = event.pathParameters?.id;
     if (!shortKey) {
-      return { statusCode: 400, body: JSON.stringify({ error: "Missing short key" }) };
+      return { 
+        statusCode: 400, 
+        headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
+        body: JSON.stringify({ error: "Missing short key" }) 
+      };
     }
 
     const result = await dynamoDB.send(new GetItemCommand({
@@ -21,6 +25,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     if (!result.Item) {
       return {
         statusCode: 404,
+        headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
         body: JSON.stringify({ error: "URL not found" })
       }
     }
@@ -38,13 +43,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     
     return {
       statusCode: 301,
-      headers: { Location: originalUrl },
+      headers: { 
+        "Access-Control-Allow-Origin": "*", 
+        "Access-Control-Allow-Headers": "Content-Type",
+        ...(originalUrl && { Location: originalUrl })  
+      },
       body: ""
     };
 
   } catch (error: unknown) {
-    // console.error("Lambda function error:", error);
-    
     let errorMessage = "Internal Server Error";
 
     if (error instanceof Error) {
@@ -55,6 +62,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       errorMessage += ": An unknown error occurred";
     }
 
-    return { statusCode: 500, body: JSON.stringify({ error: errorMessage }) };
+    return { 
+      statusCode: 500, 
+      "Access-Control-Allow-Origin": "*", 
+      "Access-Control-Allow-Headers": "Content-Type", 
+      body: JSON.stringify({ error: errorMessage }) };
   }
 };

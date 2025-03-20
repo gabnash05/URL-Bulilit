@@ -13,12 +13,17 @@ export const handler: APIGatewayProxyHandler = async () => {
     const urls = result.Items?.map(item => ({
       shortKey: item.id.S,
       originalUrl: item.originalUrl.S,
-      clicks: parseInt(item.clicks.N || "0")
+      clicks: parseInt(item.clicks.N || "0"),
+      createdAt: item.createdAt.S,
     }));
 
     const sortedUrls = urls?.sort((a, b) => b.clicks - a.clicks).slice(0, 50) || [];
 
-    return { statusCode: 200, body: JSON.stringify(sortedUrls) };
+    return { 
+      statusCode: 200,
+      headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
+      body: JSON.stringify(sortedUrls) 
+    };
   
   } catch (error: unknown) {
     let errorMessage = "Internal Server Error";
@@ -31,6 +36,10 @@ export const handler: APIGatewayProxyHandler = async () => {
         errorMessage += `: An unknown error occurred`;
     }
 
-    return { statusCode: 500, body: JSON.stringify({ error: errorMessage }) };
+    return { 
+      statusCode: 500, 
+      headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
+      body: JSON.stringify({ error: errorMessage }) 
+    };
   }
 };

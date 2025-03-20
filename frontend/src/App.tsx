@@ -1,53 +1,72 @@
 import './styles/App.css'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiLink } from "react-icons/fi";
 import { FaCopy } from "react-icons/fa";
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 
-import RecentLinksTable from './components/recentLinksTable';
+import RecentLinksTable from './components/RecentLinksTable';
+import ClickedLinksTable from './components/ClickedLinksTable';
+
+interface LinkData {
+  shortKey: string;
+  originalUrl: string;
+  clicks: number;
+  createdAt: string
+}
 
 function App() {
-  const [ url, setUrl ] = useState("");
-  const [ shortenedUrl, setshortenedUrl ] = useState("");
-  const [ copied, setCopied ] = useState(false);
+  const [ url, setUrl ] = useState<string>("");
+  const [ shortenedUrl, setShortenedUrl ] = useState<string>("");
+  const [ copied, setCopied ] = useState<boolean>(false);
+  const [ recentLinks, setRecentLinks ] = useState<LinkData[]>([]);
+  const [ clickedLinks, setClickedLinks ] = useState<LinkData[]>([]);
 
+  const apiCode = "str2pegh3m";
+  const region = "ap-southeast-2"
+
+  const rootUrl = `https://${apiCode}.execute-api.${region}.amazonaws.com/prod/`;
+
+  const shortenUrl = `${rootUrl}shorten`;
+  const statsUrl = `${rootUrl}stats`;
   const handleShortenUrl = async () => {
-    setshortenedUrl("https://facebook.com");
-    setCopied(false);
-  }
+    try {
+      const response = await axios.post(shortenUrl, { url });
+      const shortKey = response.data.shortKey;
+
+      setShortenedUrl(`${rootUrl}${shortKey}`);
+      setCopied(false);
+    } catch (error) {
+      console.error('Error shortening URL:', error);
+    }
+  };
+  
+  useEffect(() => {
+    const fetchTableData = async () => {
+      try {
+        // const [recentRes, clickedRes] = await Promise.all([
+        //   axios.get(recentUrl),
+        //   axios.get(statsUrl),
+        // ]);
+
+        const clickedRes = await axios.get(statsUrl);
+
+        setRecentLinks([]);
+        setClickedLinks(clickedRes.data);
+      } catch(error) {
+        console.error("Error fetching data: ", error);
+      }
+    }
+
+    fetchTableData()
+  }, [handleShortenUrl]);
 
   const handleCopyUrl = async () => {
     await navigator.clipboard.writeText(shortenedUrl);
     setCopied(true);
-    setTimeout(() => setCopied(false), 1000);
+    setTimeout(() => setCopied(false), 700);
   }
-
-  const tableData = [{
-    shortenedUrl: "https://bllt.com/Ah5B6",
-    originalUrl: "https://www.figma.com/design/jzfm21jotgC7QgSfYWsPPq/URL-Bulilit",
-    clicks: 12,
-    date: "03/20/2025"
-  },
-  {
-    shortenedUrl: "https://bllt.com/Ah5B6",
-    originalUrl: "https://www.figma.com/design/jzfm21jotgC7QgSfYWsPPq/URL-Bulilit",
-    clicks: 12,
-    date: "03/20/2025"
-  },
-  {
-    shortenedUrl: "https://bllt.com/Ah5B6",
-    originalUrl: "https://www.figma.com/design/jzfm21jotgC7QgSfYWsPPq/URL-Bulilit",
-    clicks: 12,
-    date: "03/20/2025"
-  },
-  {
-    shortenedUrl: "https://bllt.com/Ah5B6",
-    originalUrl: "https://www.figma.com/design/jzfm21jotgC7QgSfYWsPPq/URL-Bulilit",
-    clicks: 12,
-    date: "03/20/2025"
-  }
-  ]
 
   return (
     <>
@@ -117,7 +136,8 @@ function App() {
         transforms long, cumbersome links into short, shareable URLs.
       </p>
 
-      <RecentLinksTable data={tableData} handleCopyUrl={handleCopyUrl}/>
+      {/* <RecentLinksTable data={recentLinks} setCopied={setCopied}/> */}
+      <ClickedLinksTable data={clickedLinks} setCopied={setCopied}/>
       </div>
     </>
   )

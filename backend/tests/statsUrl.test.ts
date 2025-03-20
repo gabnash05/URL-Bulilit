@@ -15,8 +15,8 @@ describe("URL Stats Lambda", () => {
 
   it("should return an array of URLs with the highest clicks", async () => {
     const mockUrls = [
-      { id: { S: "abc123" }, originalUrl: { S: "https://example.com" }, clicks: { N: "100" } },
-      { id: { S: "xyz789" }, originalUrl: { S: "https://test.com" }, clicks: { N: "200" } }
+      { id: { S: "abc123" }, originalUrl: { S: "https://example.com" }, clicks: { N: "100" }, createdAt: { S: "2025-03-20T12:34:56.789Z"} },
+      { id: { S: "xyz789" }, originalUrl: { S: "https://test.com" }, clicks: { N: "200" }, createdAt: { S: "2025-03-20T12:34:56.789Z"} }
     ];
     const mockEvent: APIGatewayProxyEvent = {} as any;
 
@@ -27,8 +27,8 @@ describe("URL Stats Lambda", () => {
     expect(response.statusCode).toBe(200);
     const responseBody = JSON.parse(response.body);
     expect(responseBody).toHaveLength(2);
-    expect(responseBody[0]).toEqual({ shortKey: "xyz789", originalUrl: "https://test.com", clicks: 200 });
-    expect(responseBody[1]).toEqual({ shortKey: "abc123", originalUrl: "https://example.com", clicks: 100 });
+    expect(responseBody[0]).toEqual({ shortKey: "xyz789", originalUrl: "https://test.com", clicks: 200, createdAt: "2025-03-20T12:34:56.789Z" });
+    expect(responseBody[1]).toEqual({ shortKey: "abc123", originalUrl: "https://example.com", clicks: 100, createdAt: "2025-03-20T12:34:56.789Z" });
   });
 
   it("should return 500 on internal server error", async () => {

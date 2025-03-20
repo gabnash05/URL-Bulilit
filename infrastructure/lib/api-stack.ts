@@ -9,14 +9,20 @@ export class ApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, lambdaStack: LambdaStack, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // API Gateway
-    this.api = new apigateway.RestApi(this, "URL-Bulilit-Api");
+    // ✅ Use default CORS options (Avoid duplicate OPTIONS)
+    this.api = new apigateway.RestApi(this, "URL-Bulilit-Api", {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"],
+      },
+    });
 
     // Routes
     this.api.root
       .resourceForPath("shorten")
       .addMethod("POST", new apigateway.LambdaIntegration(lambdaStack.shortenFn));
-    
+
     this.api.root
       .resourceForPath("{id}")
       .addMethod("GET", new apigateway.LambdaIntegration(lambdaStack.redirectFn));
@@ -24,11 +30,5 @@ export class ApiStack extends cdk.Stack {
     this.api.root
       .resourceForPath("stats")
       .addMethod("GET", new apigateway.LambdaIntegration(lambdaStack.statsFn));
-
-    // CORS
-    this.api.root.addCorsPreflight({
-      allowOrigins: apigateway.Cors.ALL_ORIGINS,
-      allowMethods: apigateway.Cors.ALL_METHODS,
-    });
   }
 }

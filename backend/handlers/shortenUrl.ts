@@ -4,12 +4,13 @@ import { createHash } from 'crypto';
 
 const dynamoDB = new DynamoDBClient({ region: "ap-southeast-2"});
 const TABLE_NAME = process.env.TABLE_NAME;
- 
+
 export const handler: APIGatewayProxyHandler = async (event): Promise<APIGatewayProxyResult> => {
   try {
     if (!event.body) {
       return {
         statusCode: 400,
+        headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
         body: JSON.stringify({ error: "Missing request body" }),
       };
     }
@@ -19,6 +20,7 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     if (!url) {
       return {
         statusCode: 400,
+        headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
         body: JSON.stringify({ error: "Missing URL" }),
       };
     }
@@ -33,19 +35,23 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
     }));
 
     if (!urlExists.Item) {
+      const timestamp = new Date().toISOString();
+
       await dynamoDB.send(new PutItemCommand({
         TableName: TABLE_NAME,
         Item: {
           id: { S: shortKey },
           originalUrl: { S: url },
           clicks: { N: "0"},
+          createdAt: { S: timestamp },
         }
       }));
     }
     
     return {
       statusCode: 200,
-      body: JSON.stringify({ shortenedUrl: `https://DOMANNAME.com/${shortKey}`}),
+      headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
+      body: JSON.stringify({ shortKey }),
     };
 
   } catch (error: unknown) {
@@ -59,6 +65,10 @@ export const handler: APIGatewayProxyHandler = async (event): Promise<APIGateway
         errorMessage += `: An unknown error occurred`;
     }
 
-    return { statusCode: 500, body: JSON.stringify({ error: errorMessage }) };
+    return { 
+      statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
+      body: JSON.stringify({ error: errorMessage }) 
+    };
   }
 };

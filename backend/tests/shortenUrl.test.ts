@@ -24,7 +24,7 @@ describe("URL Shortener Lambda", () => {
     const response = (await handler(mockEvent, mockContext, mockCallback)) as APIGatewayProxyResult;
 
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toHaveProperty("shortenedUrl");
+    expect(JSON.parse(response.body)).toHaveProperty("shortKey");
   });
 
   it("should return 400 if URL is missing", async () => {
