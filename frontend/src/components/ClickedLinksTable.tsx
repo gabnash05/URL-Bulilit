@@ -18,7 +18,7 @@ interface ClickedLinksTableProps {
 const ClickedLinksTable: React.FC<ClickedLinksTableProps> = ({ data = [], setCopied }) => {
   
   // UPDATE THE SHORTKEY FIELD
-  const apiCode = "str2pegh3m";
+  const apiCode = "5nmng4fg48";
   const region = "ap-southeast-2"
 
   const rootUrl = `https://${apiCode}.execute-api.${region}.amazonaws.com/prod/`;
@@ -46,10 +46,10 @@ const ClickedLinksTable: React.FC<ClickedLinksTableProps> = ({ data = [], setCop
       <table className="min-w-6xl border text-gray-300 border-[#0B101B] bg-gray-900">
         <thead>
           <tr className="bg-gray-800 text-left">
-            <th className="p-4 border-b border-[#0B101B]">Short Link</th>
-            <th className="p-4 border-b border-[#0B101B]">Original Link</th>
-            <th className="p-4 border-b border-[#0B101B]">Clicks</th>
-            <th className="p-4 border-b border-[#0B101B]">Created</th>
+            <th className="p-4 border-b border-[#0B101B] w-1/5">Short Link</th>
+            <th className="p-4 border-b border-[#0B101B] ">Original Link</th>
+            <th className="p-4 border-b border-[#0B101B] w-1/10">Clicks</th>
+            <th className="p-4 border-b border-[#0B101B] w-1/5">Created</th>
           </tr>
         </thead>
         <tbody>
@@ -61,7 +61,12 @@ const ClickedLinksTable: React.FC<ClickedLinksTableProps> = ({ data = [], setCop
                     className="flex items-center cursor-pointer"
                     onClick={() => handleCopyUrl(rootUrl + row.shortKey)}
                   >
-                    <a href={rootUrl + row.shortKey}>{rootUrl}{row.shortKey}</a>
+                    <a 
+                      href={rootUrl + row.shortKey}
+                      className="max-w-[200px] overflow-hidden whitespace-nowrap"
+                    >
+                      {rootUrl}{row.shortKey}
+                    </a>
                     <span className="text-gray-400 pl-4 pr-2 cursor-pointer hover:text-gray-100">
                       <FaCopy size={18} />
                     </span>
@@ -75,11 +80,25 @@ const ClickedLinksTable: React.FC<ClickedLinksTableProps> = ({ data = [], setCop
                     <span className="text-gray-400 pr-2">
                       <FiLink size={24} />
                     </span>
-                    <a href={row.originalUrl}>{row.originalUrl}</a>
+                    <a 
+                      href={row.originalUrl}
+                      className="max-w-[500px] overflow-hidden whitespace-nowrap"
+                    >
+                      {row.originalUrl}
+                    </a>
                   </div>
                 </td>
                 <td className="p-4 border-b border-[#0B101B]">{row.clicks}</td>
-                <td className="p-4 border-b border-[#0B101B]">{row.createdAt}</td>
+                <td className="p-4 border-b border-[#0B101B]">
+                  {new Date(row.createdAt).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </td>
               </tr>
             ))
           ) : (

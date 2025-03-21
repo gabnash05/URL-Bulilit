@@ -23,13 +23,15 @@ function App() {
   const [ recentLinks, setRecentLinks ] = useState<LinkData[]>([]);
   const [ clickedLinks, setClickedLinks ] = useState<LinkData[]>([]);
 
-  const apiCode = "str2pegh3m";
+  const apiCode = "5nmng4fg48";
   const region = "ap-southeast-2"
 
   const rootUrl = `https://${apiCode}.execute-api.${region}.amazonaws.com/prod/`;
 
   const shortenUrl = `${rootUrl}shorten`;
   const statsUrl = `${rootUrl}stats`;
+  const recentUrl = `${rootUrl}recent`;
+
   const handleShortenUrl = async () => {
     try {
       const response = await axios.post(shortenUrl, { url });
@@ -45,14 +47,12 @@ function App() {
   useEffect(() => {
     const fetchTableData = async () => {
       try {
-        // const [recentRes, clickedRes] = await Promise.all([
-        //   axios.get(recentUrl),
-        //   axios.get(statsUrl),
-        // ]);
+        const [recentRes, clickedRes] = await Promise.all([
+          axios.get(recentUrl),
+          axios.get(statsUrl),
+        ]);
 
-        const clickedRes = await axios.get(statsUrl);
-
-        setRecentLinks([]);
+        setRecentLinks(recentRes.data);
         setClickedLinks(clickedRes.data);
       } catch(error) {
         console.error("Error fetching data: ", error);
@@ -136,7 +136,7 @@ function App() {
         transforms long, cumbersome links into short, shareable URLs.
       </p>
 
-      {/* <RecentLinksTable data={recentLinks} setCopied={setCopied}/> */}
+      <RecentLinksTable data={recentLinks} setCopied={setCopied}/>
       <ClickedLinksTable data={clickedLinks} setCopied={setCopied}/>
       </div>
     </>
