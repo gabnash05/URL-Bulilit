@@ -17,7 +17,12 @@ export const handler: APIGatewayProxyHandler = async () => {
       createdAt: item.createdAt.S,
     }));
 
-    const sortedUrls = urls?.sort((a, b) => b.clicks - a.clicks).slice(0, 50) || [];
+    const sortedUrls = urls
+      ?.sort((a, b) => 
+        new Date(b.createdAt ?? "1970-01-01").getTime() - 
+        new Date(a.createdAt ?? "1970-01-01").getTime()
+      )
+      .slice(0, 10) || [];
 
     return { 
       statusCode: 200,
@@ -25,9 +30,9 @@ export const handler: APIGatewayProxyHandler = async () => {
       body: JSON.stringify(sortedUrls) 
     };
   
-  } catch (error: unknown) {
-    console.error("Error scanning DynamoDB:", error); 
-    
+  } catch (error) {
+    console.error("Error scanning DynamoDB:", error);
+
     let errorMessage = "Internal Server Error";
     if (error instanceof Error) errorMessage += `: ${error.message}`;
 

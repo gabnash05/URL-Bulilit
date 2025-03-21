@@ -7,6 +7,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly shortenFn: lambda.Function;
   public readonly redirectFn: lambda.Function;
   public readonly statsFn: lambda.Function;
+  public readonly recentFn: lambda.Function;
 
   constructor(scope: Construct, id: string, table: dynamodb.Table, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -33,10 +34,22 @@ export class LambdaStack extends cdk.Stack {
         code: lambda.Code.fromAsset("../backend/dist/handlers"),
         environment: { TABLE_NAME: table.tableName },
       });
+
+      // recentUrl Lambda Function
+      this.recentFn = new lambda.Function(this, "RecentFunction", {
+        runtime: lambda.Runtime.NODEJS_22_X,
+        handler: "recentUrl.handler",
+        code: lambda.Code.fromAsset("../backend/dist/handlers"),
+        environment: { 
+          TABLE_NAME: table.tableName,
+          SORTING_INDEX: "CreatedAtIndex"
+         },
+      });
     
     // Grant permissions
     table.grantReadWriteData(this.shortenFn);
     table.grantReadWriteData(this.redirectFn);
     table.grantReadData(this.statsFn);
+    table.grantReadData(this.recentFn);
   }
 }

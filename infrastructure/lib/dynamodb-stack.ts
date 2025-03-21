@@ -12,7 +12,6 @@ export class DynamoDBStack extends cdk.Stack {
       tableName: "urls",
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
       removalPolicy: cdk.RemovalPolicy.DESTROY, // CHANGE TO RETAIN ON PROD
-
     });
   }
 }

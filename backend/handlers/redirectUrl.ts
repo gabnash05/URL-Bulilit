@@ -52,20 +52,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     };
 
   } catch (error: unknown) {
+    console.error("Error scanning DynamoDB:", error); 
+    
     let errorMessage = "Internal Server Error";
-
-    if (error instanceof Error) {
-      errorMessage += `: ${error.message}`;
-    } else if (typeof error === "string" && error.trim() !== "") {
-      errorMessage += `: ${error}`;
-    } else {
-      errorMessage += ": An unknown error occurred";
-    }
+    if (error instanceof Error) errorMessage += `: ${error.message}`;
 
     return { 
       statusCode: 500, 
-      "Access-Control-Allow-Origin": "*", 
-      "Access-Control-Allow-Headers": "Content-Type", 
+      headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type" },
       body: JSON.stringify({ error: errorMessage }) };
   }
 };

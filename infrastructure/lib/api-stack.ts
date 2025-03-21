@@ -30,5 +30,9 @@ export class ApiStack extends cdk.Stack {
     this.api.root
       .resourceForPath("stats")
       .addMethod("GET", new apigateway.LambdaIntegration(lambdaStack.statsFn));
+    
+    this.api.root
+      .resourceForPath("recent")
+      .addMethod("GET", new apigateway.LambdaIntegration(lambdaStack.recentFn));
   }
 }
